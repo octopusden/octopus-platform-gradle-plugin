@@ -25,10 +25,25 @@ class OctopusPlatformPlugin : Plugin<Project> {
 
         LOGGER.info("Applying octopus-platform-gradle-plugin to root project {}", project)
 
-        project.pluginManager.apply(BUILD_INTEGRATION_PLUGIN_ID)
-        project.pluginManager.apply(PUBLISHING_PLUGIN_ID)
-        project.pluginManager.apply(SONARQUBE_PLUGIN_ID)
+        val buildIntegrationEnabled = isConstituentEnabled(project, "build-integration")
+        val publishingEnabled = isConstituentEnabled(project, "publishing")
+        val sonarEnabled = isConstituentEnabled(project, "sonar")
+
+        if (buildIntegrationEnabled) project.pluginManager.apply(BUILD_INTEGRATION_PLUGIN_ID)
+        if (publishingEnabled) project.pluginManager.apply(PUBLISHING_PLUGIN_ID)
+        if (sonarEnabled) project.pluginManager.apply(SONARQUBE_PLUGIN_ID)
+
+        LOGGER.info(
+            "octopus-platform applied: build-integration={}, publishing={}, sonar={}",
+            buildIntegrationEnabled, publishingEnabled, sonarEnabled,
+        )
     }
+
+    private fun isConstituentEnabled(project: Project, key: String): Boolean =
+        project.findProperty("octopus-platform.$key.enabled")
+            ?.toString()
+            ?.toBoolean()
+            ?: true
 
     companion object {
         private val LOGGER = LoggerFactory.getLogger(OctopusPlatformPlugin::class.java)

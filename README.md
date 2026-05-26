@@ -92,3 +92,13 @@ sonar {
 
 - Re-applying the plugin on the root project is a no-op (guarded by an `extraProperties` marker `setupOctopusPlatform`).
 - Applying the plugin on a subproject throws a `GradleException` with a message pointing to the root project.
+
+## Disabling a constituent
+
+Each constituent can be individually opted out via a Gradle property. Defaults to `true` (all three applied).
+
+| Property                                          | Effect when set to `false`                |
+|---------------------------------------------------|-------------------------------------------|
+| `octopus-platform.build-integration.enabled`      | skip `octopus-build-integration` apply    |
+| `octopus-platform.publishing.enabled`             | skip `octopus-publishing` apply           |
+| `octopus-platform.sonar.enabled`                  | skip `org.sonarqube` apply                |
