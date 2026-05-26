@@ -19,10 +19,12 @@ Versions are pinned at compile time and updated via dependency bot. There is no 
 | Building this plugin  | 25 (toolchain)              | 9.0+ (tested with 9.5.1) |
 | Consuming this plugin | 17, 21 (supported); 25 [^1] | 9.0+ (tested with 9.5.1) |
 
-[^1]: JDK 25 is **not** yet officially documented as a supported runtime by
-SonarSource (sonar-scanner-gradle 7.3 README still pins build/test to JDK 17;
-JDK 21 support landed post-7.3 on master). Our FT suite confirms plugin **apply + task graph resolution** (`sonar --dry-run`) succeeds on JDK 25, but **full
-`sonar` analysis** on JDK 25 is not yet endorsed upstream.
+[^1]: JDK 25 is not yet explicitly listed by SonarSource as a supported scanner
+runtime, but in practice it works: our FT suite passes on JDK 25, and a real
+`sonar` task against SonarQube 25.4+ succeeds because the **server auto-provisions**
+a JDK 17 analyzer JVM (look for `JRE provisioning` in the scanner log). If your
+SonarQube server has JRE provisioning disabled or is older than 10.6, run the
+`sonar` task on JDK 17 or 21 instead.
 
 The full FT suite runs against all three JDKs locally — to reproduce:
 
