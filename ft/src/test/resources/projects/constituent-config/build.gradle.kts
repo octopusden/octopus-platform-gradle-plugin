@@ -24,6 +24,10 @@ publishing {
 }
 
 configure<SonarExtension> {
+    // `isSkipProject` is a read/write property on SonarExtension and
+    // serves as the observable signal that this `configure<SonarExtension>`
+    // block actually reached the plugin. Default is `false`.
+    isSkipProject = true
     properties {
         property("sonar.projectKey", "ft-custom-project-key")
         property("sonar.host.url", "http://localhost:9000")
@@ -32,6 +36,7 @@ configure<SonarExtension> {
 
 tasks.register("verifyConfig") {
     doLast {
-        println("CONSTITUENT_EXTENSION_CONFIGURED=true")
+        val ext = project.extensions.getByType(SonarExtension::class.java)
+        println("sonar.skipProject=${ext.isSkipProject}")
     }
 }

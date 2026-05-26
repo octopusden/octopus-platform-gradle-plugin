@@ -11,10 +11,20 @@ import org.junit.jupiter.api.Test
 class SubprojectApplicationFT {
 
     @Test
-    @DisplayName("apply on subproject fails with a clear error message")
+    @DisplayName("apply on subproject fails with a clear error message (plugins { id(...) } form)")
     fun testApplicationOnSubprojectFailsFast() {
+        assertSubprojectApplicationFails(fixture = "subproject-only")
+    }
+
+    @Test
+    @DisplayName("apply on subproject fails with a clear error message (imperative apply(plugin = ...) form)")
+    fun testApplicationOnSubprojectFailsFast_imperativeApply() {
+        assertSubprojectApplicationFails(fixture = "subproject-only-imperative")
+    }
+
+    private fun assertSubprojectApplicationFails(fixture: String) {
         val result = runGradle {
-            testProjectName = "subproject-only"
+            testProjectName = fixture
             tasks = listOf("help")
         }
         assertThat(result.instance.exitCode)

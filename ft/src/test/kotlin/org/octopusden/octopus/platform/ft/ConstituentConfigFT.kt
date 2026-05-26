@@ -22,6 +22,6 @@ class ConstituentConfigFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val out = result.stdout.joinToString("\n")
-        assertThat(out).contains("CONSTITUENT_EXTENSION_CONFIGURED=true")
+        assertThat(out).contains("sonar.skipProject=true")
     }
 }

@@ -72,7 +72,7 @@ fun runGradle(init: TestGradleRun.() -> Unit): GradleRunResult {
         .mapBatExtension()
         .mapCmdExtension()
         .workDirectory(projectPath)
-        .commandAndArguments("$projectPath/gradlew")
+        .commandAndArguments(projectPath.resolve("gradlew").toString())
         .stdOutConsumer(stdout::add)
         .stdErrConsumer(stderr::add)
         .processInstance { it.unlimited() }

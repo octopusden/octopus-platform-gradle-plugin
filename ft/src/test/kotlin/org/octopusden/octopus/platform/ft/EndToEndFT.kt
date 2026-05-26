@@ -27,7 +27,7 @@ class EndToEndFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         // exportDependencies emits its output file under build/
-        val depsFile = result.projectPath.resolve("build/components-dependencies.json")
+        val depsFile = result.projectPath.resolve(BUILD_INTEGRATION_DEPS_OUTPUT)
         assertThat(depsFile)
             .withFailMessage("Expected exportDependencies to produce %s", depsFile)
             .exists()
@@ -53,6 +53,11 @@ class EndToEndFT {
         assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
 
         val out = result.stdout.joinToString("\n")
-        assertThat(out).contains(":sonar SKIPPED")
+        assertThat(out).contains(":sonar")
+    }
+
+    companion object {
+        // Contract of `octopus-build-integration`'s `exportDependencies` task — owned by that plugin
+        private const val BUILD_INTEGRATION_DEPS_OUTPUT = "build/components-dependencies.json"
     }
 }

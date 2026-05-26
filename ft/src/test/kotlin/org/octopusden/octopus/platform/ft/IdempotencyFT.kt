@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 /**
- * Applying `id("org.octopusden.octopus-platform")` on both the root project
- * and a subproject must not double-configure or fail.
+ * Re-applying `id("org.octopusden.octopus-platform")` on the root project
+ * must not double-configure or fail.
  */
 class IdempotencyFT {
 
     @Test
-    @DisplayName("plugin applied on root and child does not double-configure or fail")
+    @DisplayName("plugin re-applied on root does not double-configure or fail")
     fun testPluginIsIdempotent() {
         val result = runGradle {
             testProjectName = "idempotency"
