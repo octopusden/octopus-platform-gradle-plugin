@@ -60,7 +60,7 @@ pluginManagement {
 
 ### Using Version Catalogs (optional)
 
-If your build already uses a [version catalogs](https://docs.gradle.org/current/userguide/version_catalogs.html), declare the plugin in `libs.versions.toml`:
+If your build already uses a [version catalog](https://docs.gradle.org/current/userguide/version_catalogs.html), declare the plugin in `libs.versions.toml`:
 
 ```toml
 [versions]
