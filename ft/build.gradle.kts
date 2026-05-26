@@ -37,4 +37,9 @@ tasks.test {
     environment("OCTOPUS_PLATFORM_VERSION", pluginVersion)
     systemProperty("octopus-platform.version", pluginVersion)
     testLogging.showStandardStreams = true
+    providers.gradleProperty("ft.test.jdk").orNull?.toInt()?.let { jdk ->
+        javaLauncher.set(
+            javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(jdk)) }
+        )
+    }
 }

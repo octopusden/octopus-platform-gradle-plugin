@@ -14,10 +14,22 @@ Versions are pinned at compile time and updated via dependency bot. There is no 
 
 ## Requirements
 
-| Audience              | JDK            | Gradle                   |
-|-----------------------|----------------|--------------------------|
-| Building this plugin  | 25 (toolchain) | 9.0+ (tested with 9.5.1) |
-| Consuming this plugin | 17+            | 9.0+                     |
+| Audience              | JDK                        | Gradle                   |
+|-----------------------|----------------------------|--------------------------|
+| Building this plugin  | 25 (toolchain)             | 9.0+ (tested with 9.5.1) |
+| Consuming this plugin | 17, 21, 25 (FT-verified)   | 9.0+ (tested with 9.5.1) |
+
+- The consumer JDK floor (17) is set by `octopus-publishing`
+- The other constituents are more lenient (`octopus-build-integration` targets JDK 8,
+`org.sonarqube` 7.3 supports Gradle 5+)
+
+The full FT suite runs against all three JDKs locally — to reproduce:
+
+```sh
+./gradlew :ft:test -Pft.test.jdk=17
+./gradlew :ft:test -Pft.test.jdk=21
+./gradlew :ft:test -Pft.test.jdk=25
+```
 
 ## Applying the plugin
 
