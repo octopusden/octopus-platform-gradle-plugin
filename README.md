@@ -14,14 +14,15 @@ Versions are pinned at compile time and updated via dependency bot. There is no 
 
 ## Requirements
 
-| Audience              | JDK                        | Gradle                   |
-|-----------------------|----------------------------|--------------------------|
-| Building this plugin  | 25 (toolchain)             | 9.0+ (tested with 9.5.1) |
-| Consuming this plugin | 17, 21, 25 (FT-verified)   | 9.0+ (tested with 9.5.1) |
+| Audience              | JDK                         | Gradle                   |
+|-----------------------|-----------------------------|--------------------------|
+| Building this plugin  | 25 (toolchain)              | 9.0+ (tested with 9.5.1) |
+| Consuming this plugin | 17, 21 (supported); 25 [^1] | 9.0+ (tested with 9.5.1) |
 
-- The consumer JDK floor (17) is set by `octopus-publishing`
-- The other constituents are more lenient (`octopus-build-integration` targets JDK 8,
-`org.sonarqube` 7.3 supports Gradle 5+)
+[^1]: JDK 25 is **not** yet officially documented as a supported runtime by
+SonarSource (sonar-scanner-gradle 7.3 README still pins build/test to JDK 17;
+JDK 21 support landed post-7.3 on master). Our FT suite confirms plugin **apply + task graph resolution** (`sonar --dry-run`) succeeds on JDK 25, but **full
+`sonar` analysis** on JDK 25 is not yet endorsed upstream.
 
 The full FT suite runs against all three JDKs locally — to reproduce:
 
