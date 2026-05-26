@@ -40,7 +40,7 @@ class EndToEndFT {
         val publishedJar = Files.walk(result.projectPath.resolve("build/libs")).use { stream ->
             stream.filter { it.fileName.toString().endsWith(".jar") }.findFirst().orElse(null)
         }
-        assertThat(publishedJar).isNotNull
+        assertThat(publishedJar).isNotNull()
     }
 
     @Test
