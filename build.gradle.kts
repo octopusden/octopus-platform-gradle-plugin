@@ -30,7 +30,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -70,6 +70,7 @@ artifactory {
             contextUrl = "$baseUrl/artifactory"
         }
         repository {
+            // Dev/snapshot sink only — releases go to Sonatype Central (see `nexusPublishing` below)
             repoKey = "rnd-maven-dev-local"
             username = System.getenv("ARTIFACTORY_DEPLOYER_USERNAME")
             password = System.getenv("ARTIFACTORY_DEPLOYER_PASSWORD")

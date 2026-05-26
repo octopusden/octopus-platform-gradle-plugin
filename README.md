@@ -16,7 +16,7 @@ Versions are pinned at compile time and updated via dependency bot. There is no 
 
 | Audience              | JDK            | Gradle                   |
 |-----------------------|----------------|--------------------------|
-| Building this plugin  | 21 (toolchain) | 9.0+ (tested with 9.5.1) |
+| Building this plugin  | 25 (toolchain) | 9.0+ (tested with 9.5.1) |
 | Consuming this plugin | 17+            | 9.0+                     |
 
 ## Applying the plugin
