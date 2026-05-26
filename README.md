@@ -58,6 +58,43 @@ pluginManagement {
 }
 ```
 
+### Using Version Catalogs (optional)
+
+If your build already uses a [version catalogs](https://docs.gradle.org/current/userguide/version_catalogs.html), declare the plugin in `libs.versions.toml`:
+
+```toml
+[versions]
+octopus-platform = "<version>"
+
+[plugins]
+octopus-platform = { id = "org.octopusden.octopus-platform", version.ref = "octopus-platform" }
+```
+
+Then apply it from the root `build.gradle.kts`:
+
+```kotlin
+plugins {
+    alias(libs.plugins.octopus.platform)
+}
+```
+
+#### Overriding the version at build time
+
+For monorepo / CI scenarios where the plugin version is built in the same pipeline, override the catalog entry from `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("libs.versions.toml"))
+            providers.gradleProperty("octopus-platform.version").orNull?.let { v ->
+                version("octopus-platform", v)
+            }
+        }
+    }
+}
+```
+
 After application, the following tasks are available on the root project:
 
 - `exportDependencies` — from `octopus-build-integration`
