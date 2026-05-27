@@ -40,6 +40,7 @@ fun runGradle(init: TestGradleRun.() -> Unit): GradleRunResult {
 
     val templatePath = locateResource("/projects/${config.testProjectName}")
     val projectPath = Files.createTempDirectory("platform-ft-${config.testProjectName}-")
+    registerForCleanup(projectPath)
     copyDirectory(templatePath, projectPath)
 
     val wrapperSource = locateWrapperRoot()
@@ -138,5 +139,32 @@ private fun copyDirectory(source: Path, target: Path) {
                 Files.copy(src, dest, StandardCopyOption.REPLACE_EXISTING)
             }
         }
+    }
+}
+
+/**
+ * Registers the given temp directory for deletion on JVM shutdown.
+ *
+ * Cleanup runs after the test JVM finishes, so artifacts remain available
+ * on disk during the test run for debugging via the captured logs.
+ */
+private val cleanupRegistered = java.util.concurrent.atomic.AtomicBoolean(false)
+private val pendingCleanup = java.util.concurrent.ConcurrentLinkedQueue<Path>()
+
+private fun registerForCleanup(dir: Path) {
+    pendingCleanup.add(dir)
+    if (cleanupRegistered.compareAndSet(false, true)) {
+        Runtime.getRuntime().addShutdownHook(Thread({
+            pendingCleanup.forEach { path ->
+                runCatching {
+                    if (Files.exists(path)) {
+                        Files.walk(path).use { stream ->
+                            stream.sorted(Comparator.reverseOrder())
+                                .forEach { Files.deleteIfExists(it) }
+                        }
+                    }
+                }
+            }
+        }, "platform-ft-cleanup"))
     }
 }

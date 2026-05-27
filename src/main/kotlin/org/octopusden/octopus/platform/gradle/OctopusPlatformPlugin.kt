@@ -39,11 +39,22 @@ class OctopusPlatformPlugin : Plugin<Project> {
         )
     }
 
-    private fun isConstituentEnabled(project: Project, key: String): Boolean =
-        project.findProperty("octopus-platform.$key.enabled")
-            ?.toString()
-            ?.toBoolean()
-            ?: true
+    private fun isConstituentEnabled(project: Project, key: String): Boolean {
+        val propName = "octopus-platform.$key.enabled"
+        val raw = project.findProperty(propName)?.toString() ?: return true
+        return when (raw.trim().lowercase()) {
+            "true" -> true
+            "false" -> false
+            else -> {
+                LOGGER.warn(
+                    "Unrecognised value '{}' for property '{}' — expected 'true' or 'false'. " +
+                        "Falling back to default (enabled).",
+                    raw, propName,
+                )
+                true
+            }
+        }
+    }
 
     companion object {
         private val LOGGER = LoggerFactory.getLogger(OctopusPlatformPlugin::class.java)
