@@ -13,6 +13,8 @@ import java.nio.file.Files
  *    runs and produces its output file
  *  - `publishToMavenLocal` (from `maven-publish` wired by `octopus-publishing`)
  *    publishes the artifact to the local Maven cache
+ *  - `processLicensedDependencies` (from `octopus-license-management`) runs and
+ *    produces its `build/dependencies.json` artifact
  *  - `sonar` task graph resolves successfully under `--dry-run` (no Sonar server hit)
  */
 class EndToEndFT {
@@ -44,6 +46,26 @@ class EndToEndFT {
     }
 
     @Test
+    @DisplayName("e2e: processLicensedDependencies produces build/dependencies.json")
+    fun testProcessLicensedDependencies() {
+        val result = runGradle {
+            testProjectName = "e2e"
+            tasks = listOf("clean", "processLicensedDependencies")
+            additionalProperties = mapOf(
+                // processLicensedDependencies.onlyIf gate (see LicenseGradlePlugin)
+                "license.skip" to "false",
+                "supported-groups" to "org.octopusden.octopus",
+            )
+        }
+        assertEquals(0, result.instance.exitCode, "Gradle execution failure:\n${result.stderr.joinToString("\n")}")
+
+        val depsFile = result.projectPath.resolve(LICENSE_DEPS_OUTPUT)
+        assertThat(depsFile)
+            .withFailMessage("Expected processLicensedDependencies to produce %s", depsFile)
+            .exists()
+    }
+
+    @Test
     @DisplayName("e2e: sonar task graph resolves under --dry-run (no Sonar server required)")
     fun testSonarTaskGraphResolves() {
         val result = runGradle {
@@ -59,5 +81,8 @@ class EndToEndFT {
     companion object {
         // Contract of `octopus-build-integration`'s `exportDependencies` task — owned by that plugin
         private const val BUILD_INTEGRATION_DEPS_OUTPUT = "build/components-dependencies.json"
+
+        // Contract of `octopus-license-management`'s `processLicensedDependencies` task — owned by that plugin
+        private const val LICENSE_DEPS_OUTPUT = "build/dependencies.json"
     }
 }

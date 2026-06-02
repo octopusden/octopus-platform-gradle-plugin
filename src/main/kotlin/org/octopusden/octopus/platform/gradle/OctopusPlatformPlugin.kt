@@ -27,15 +27,17 @@ class OctopusPlatformPlugin : Plugin<Project> {
 
         val buildIntegrationEnabled = isConstituentEnabled(project, "build-integration")
         val publishingEnabled = isConstituentEnabled(project, "publishing")
+        val licenseManagementEnabled = isConstituentEnabled(project, "license-management")
         val sonarEnabled = isConstituentEnabled(project, "sonar")
 
         if (buildIntegrationEnabled) project.pluginManager.apply(BUILD_INTEGRATION_PLUGIN_ID)
         if (publishingEnabled) project.pluginManager.apply(PUBLISHING_PLUGIN_ID)
+        if (licenseManagementEnabled) project.pluginManager.apply(LICENSE_MANAGEMENT_PLUGIN_ID)
         if (sonarEnabled) project.pluginManager.apply(SONARQUBE_PLUGIN_ID)
 
         LOGGER.info(
-            "octopus-platform applied: build-integration={}, publishing={}, sonar={}",
-            buildIntegrationEnabled, publishingEnabled, sonarEnabled,
+            "octopus-platform applied: build-integration={}, publishing={}, license-management={}, sonar={}",
+            buildIntegrationEnabled, publishingEnabled, licenseManagementEnabled, sonarEnabled,
         )
     }
 
@@ -63,6 +65,7 @@ class OctopusPlatformPlugin : Plugin<Project> {
 
         const val BUILD_INTEGRATION_PLUGIN_ID = "org.octopusden.octopus-build-integration"
         const val PUBLISHING_PLUGIN_ID = "org.octopusden.octopus-publishing"
+        const val LICENSE_MANAGEMENT_PLUGIN_ID = "org.octopusden.octopus.license-management"
         const val SONARQUBE_PLUGIN_ID = "org.sonarqube"
     }
 }

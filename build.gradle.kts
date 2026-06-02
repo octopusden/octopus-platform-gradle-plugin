@@ -19,8 +19,11 @@ repositories {
 }
 
 dependencies {
+    implementation(platform("com.fasterxml.jackson:jackson-bom:${project.property("jackson-bom.version")}"))
+
     implementation("org.octopusden.octopus-build-integration:org.octopusden.octopus-build-integration.gradle.plugin:${project.property("octopus-build-integration.version")}")
     implementation("org.octopusden.octopus-publishing:org.octopusden.octopus-publishing.gradle.plugin:${project.property("octopus-publishing.version")}")
+    implementation("org.octopusden.octopus.license-management:org.octopusden.octopus.license-management.gradle.plugin:${project.property("octopus-license-management.version")}")
     implementation("org.sonarqube:org.sonarqube.gradle.plugin:${project.property("sonarqube.version")}")
 
     testImplementation(platform("org.junit:junit-bom:${project.property("junit-jupiter.version")}"))
