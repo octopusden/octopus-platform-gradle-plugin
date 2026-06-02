@@ -105,7 +105,7 @@ Root `build.gradle` (Groovy DSL):
 ```groovy
 buildscript {
     dependencies {
-        "org.octopusden.octopus.platform:octopus-platform-gradle-plugin:${project.findProperty('octopus-platform.version')}"
+        classpath "org.octopusden.octopus.platform:octopus-platform-gradle-plugin:${project.findProperty('octopus-platform.version')}"
     }
 }
 

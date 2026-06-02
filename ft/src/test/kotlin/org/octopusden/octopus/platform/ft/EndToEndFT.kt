@@ -63,6 +63,11 @@ class EndToEndFT {
         assertThat(depsFile)
             .withFailMessage("Expected processLicensedDependencies to produce %s", depsFile)
             .exists()
+
+        val depsJson = depsFile.toFile().readText()
+        assertThat(depsJson)
+            .withFailMessage("Expected %s to reference slf4j-api, but was:%n%s", depsFile, depsJson)
+            .contains("slf4j")
     }
 
     @Test
