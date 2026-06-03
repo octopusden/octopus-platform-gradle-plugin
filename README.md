@@ -4,11 +4,12 @@ A thin **aggregator** Gradle plugin that applies common plugins used in a single
 
 ## Constituent plugins (pinned)
 
-| Plugin ID                                                                                                                                               |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`org.octopusden.octopus-build-integration`](https://github.com/octopusden/octopus-build-integration-gradle-plugin) — exposes `exportDependencies` task |
-| [`org.octopusden.octopus-publishing`](https://github.com/octopusden/octopus-publishing-gradle-plugin) — wires `artifactoryPublish` into `publish`       |
-| [`org.sonarqube`](https://plugins.gradle.org/plugin/org.sonarqube) — exposes `sonar` task                                                               |
+| Plugin ID                                                                                                                                                                              |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`org.octopusden.octopus-build-integration`](https://github.com/octopusden/octopus-build-integration-gradle-plugin) — exposes `exportDependencies` task                                |
+| [`org.octopusden.octopus-publishing`](https://github.com/octopusden/octopus-publishing-gradle-plugin) — wires `artifactoryPublish` into `publish`                                      |
+| [`org.octopusden.octopus.license-management`](https://github.com/octopusden/octopus-license-gradle-plugin) — exposes `processLicenses` / `processLicensedDependencies` (+ node tasks)  |
+| [`org.sonarqube`](https://plugins.gradle.org/plugin/org.sonarqube) — exposes `sonar` task                                                                                              |
 
 Versions are pinned at compile time and updated via dependency bot. There is no runtime override mechanism.
 
@@ -95,10 +96,27 @@ dependencyResolutionManagement {
 }
 ```
 
+### Legacy application (`buildscript` + `apply plugin:`)
+
+> **Note:** prefer the `plugins {}` DSL above. This form is provided only for older builds that cannot migrate yet (e.g. mixed Groovy scripts already on `buildscript { classpath ... }`)
+
+Root `build.gradle` (Groovy DSL):
+
+```groovy
+buildscript {
+    dependencies {
+        classpath "org.octopusden.octopus.platform:octopus-platform-gradle-plugin:${project.findProperty('octopus-platform.version')}"
+    }
+}
+
+apply plugin: 'org.octopusden.octopus-platform'
+```
+
 After application, the following tasks are available on the root project:
 
 - `exportDependencies` — from `octopus-build-integration`
 - `artifactoryPublish` — from `octopus-publishing`
+- `processLicenses`, `processLicensedDependencies` (and `processModuleLicenses`, `processModuleLicensedDependencies`, plus node-license variants) — from `octopus-license-management`
 - `sonar` — from `org.sonarqube`
 
 ## Configuring constituent plugins
@@ -116,6 +134,12 @@ buildIntegration {
 // octopus-publishing (uses ARTIFACTORY_URL env var + ARTIFACTORY_DEPLOYER_* credentials)
 // see https://github.com/octopusden/octopus-publishing-gradle-plugin for full surface
 
+// octopus-license-management
+licenseManagement {
+    // includePattern / excludePattern (configuration name regexes)
+    // see https://github.com/octopusden/octopus-license-gradle-plugin for full surface
+}
+
 // org.sonarqube
 sonar {
     properties {
@@ -132,10 +156,11 @@ sonar {
 
 ## Disabling a constituent
 
-Each constituent can be individually opted out via a Gradle property. Defaults to `true` (all three applied).
+Each constituent can be individually opted out via a Gradle property. Defaults to `true` (all four applied).
 
 | Property                                          | Effect when set to `false`                |
 |---------------------------------------------------|-------------------------------------------|
 | `octopus-platform.build-integration.enabled`      | skip `octopus-build-integration` apply    |
 | `octopus-platform.publishing.enabled`             | skip `octopus-publishing` apply           |
+| `octopus-platform.license-management.enabled`     | skip `octopus-license-management` apply   |
 | `octopus-platform.sonar.enabled`                  | skip `org.sonarqube` apply                |
