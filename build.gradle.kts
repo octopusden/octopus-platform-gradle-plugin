@@ -37,8 +37,8 @@ detekt {
     ignoreFailures = false
 }
 
-// The root toolchain is JDK 25, but detekt 1.23.x validates --jvm-target against a max of 22.
-// Bytecode target is 17 anyway, so pin detekt's jvm-target to 17.
+// detekt 1.23.x validates --jvm-target against a max of 22; bytecode target is 17 anyway,
+// so pin detekt's jvm-target to 17.
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     jvmTarget = "17"
 }
@@ -87,9 +87,17 @@ dependencies {
     testImplementation("org.assertj:assertj-core:${project.property("assertj.version")}")
 }
 
+// The build/quality toolchain follows the JVM the workflow provisions (the Gradle daemon JVM),
+// overridable via -Poctopus.build.jdk. detekt 1.23.x bundles Kotlin 2.0.21, whose embedded compiler
+// cannot run on JDK 24+ (fails parsing the runtime version string), so the quality gate provisions
+// JDK 21; release/security keep running on their own JDK. Tracking the running JVM here means
+// compilation never needs a second, un-provisioned JDK. Bytecode is pinned to 17 regardless (below).
+val octopusBuildJdk =
+    (findProperty("octopus.build.jdk") as String?)?.trim()?.takeIf { it.isNotEmpty() }
+        ?: JavaVersion.current().majorVersion
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(octopusBuildJdk)
     }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
