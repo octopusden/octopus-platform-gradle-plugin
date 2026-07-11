@@ -102,7 +102,10 @@ private fun locateWrapperRoot(): Path {
     error("Could not locate Gradle wrapper to copy into temp test project")
 }
 
-private fun copyWrapper(from: Path, to: Path) {
+private fun copyWrapper(
+    from: Path,
+    to: Path,
+) {
     Files.createDirectories(to.resolve("gradle/wrapper"))
     Files.copy(
         from.resolve("gradle/wrapper/gradle-wrapper.jar"),
@@ -127,7 +130,10 @@ private fun copyWrapper(from: Path, to: Path) {
     }
 }
 
-private fun copyDirectory(source: Path, target: Path) {
+private fun copyDirectory(
+    source: Path,
+    target: Path,
+) {
     Files.walk(source).use { stream ->
         stream.forEach { src ->
             val rel = source.relativize(src)
@@ -148,23 +154,27 @@ private fun copyDirectory(source: Path, target: Path) {
  * Cleanup runs after the test JVM finishes, so artifacts remain available
  * on disk during the test run for debugging via the captured logs.
  */
-private val cleanupRegistered = java.util.concurrent.atomic.AtomicBoolean(false)
+private val cleanupRegistered = java.util.concurrent.atomic
+    .AtomicBoolean(false)
 private val pendingCleanup = java.util.concurrent.ConcurrentLinkedQueue<Path>()
 
 private fun registerForCleanup(dir: Path) {
     pendingCleanup.add(dir)
     if (cleanupRegistered.compareAndSet(false, true)) {
-        Runtime.getRuntime().addShutdownHook(Thread({
-            pendingCleanup.forEach { path ->
-                runCatching {
-                    if (Files.exists(path)) {
-                        Files.walk(path).use { stream ->
-                            stream.sorted(Comparator.reverseOrder())
-                                .forEach { Files.deleteIfExists(it) }
+        Runtime.getRuntime().addShutdownHook(
+            Thread({
+                pendingCleanup.forEach { path ->
+                    runCatching {
+                        if (Files.exists(path)) {
+                            Files.walk(path).use { stream ->
+                                stream
+                                    .sorted(Comparator.reverseOrder())
+                                    .forEach { Files.deleteIfExists(it) }
+                            }
                         }
                     }
                 }
-            }
-        }, "platform-ft-cleanup"))
+            }, "platform-ft-cleanup"),
+        )
     }
 }

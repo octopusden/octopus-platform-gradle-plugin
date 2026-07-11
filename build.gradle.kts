@@ -9,9 +9,53 @@ plugins {
     signing
     id("io.github.gradle-nexus.publish-plugin")
     id("com.jfrog.artifactory")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("org.octopusden.octopus-quality")
 }
 
 description = "Octopus platform Gradle plugin (aggregator)"
+
+octopusQuality {
+    // No jacoco/kover in this repo — keep coverage verification off.
+    coverage {
+        enabled.set(false)
+    }
+    // Baselines absorb current debt; regressions fail the build.
+    kotlin {
+        failOnViolation.set(true)
+    }
+}
+
+// The convention plugin configures and aggregates SUBPROJECTS only (see OctopusQualityPlugin:
+// when subprojects exist, the root project is treated as a pure aggregator). This repo, however,
+// carries the plugin implementation source in the root module, so detekt & ktlint are applied and
+// configured here directly and folded into the aggregate `qualityStatic` task.
+detekt {
+    buildUponDefaultConfig = true
+    baseline = file("detekt-baseline.xml")
+    ignoreFailures = false
+}
+
+// The root toolchain is JDK 25, but detekt 1.23.x validates --jvm-target against a max of 22.
+// Bytecode target is 17 anyway, so pin detekt's jvm-target to 17.
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "17"
+}
+tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "17"
+}
+
+ktlint {
+    baseline.set(file("ktlint-baseline.xml"))
+    ignoreFailures.set(false)
+}
+
+gradle.projectsEvaluated {
+    tasks.named("qualityStatic") {
+        dependsOn("detekt", "ktlintCheck")
+    }
+}
 
 repositories {
     mavenCentral()
@@ -21,9 +65,21 @@ repositories {
 dependencies {
     implementation(platform("com.fasterxml.jackson:jackson-bom:${project.property("jackson-bom.version")}"))
 
-    api("org.octopusden.octopus-build-integration:org.octopusden.octopus-build-integration.gradle.plugin:${project.property("octopus-build-integration.version")}")
-    api("org.octopusden.octopus-publishing:org.octopusden.octopus-publishing.gradle.plugin:${project.property("octopus-publishing.version")}")
-    api("org.octopusden.octopus.license-management:org.octopusden.octopus.license-management.gradle.plugin:${project.property("octopus-license-management.version")}")
+    api(
+        "org.octopusden.octopus-build-integration:org.octopusden.octopus-build-integration.gradle.plugin:${project.property(
+            "octopus-build-integration.version",
+        )}",
+    )
+    api(
+        "org.octopusden.octopus-publishing:org.octopusden.octopus-publishing.gradle.plugin:${project.property(
+            "octopus-publishing.version",
+        )}",
+    )
+    api(
+        "org.octopusden.octopus.license-management:org.octopusden.octopus.license-management.gradle.plugin:${project.property(
+            "octopus-license-management.version",
+        )}",
+    )
     implementation("org.sonarqube:org.sonarqube.gradle.plugin:${project.property("sonarqube.version")}")
 
     testImplementation(platform("org.junit:junit-bom:${project.property("junit-jupiter.version")}"))

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
  * must not double-configure or fail.
  */
 class IdempotencyFT {
-
     @Test
     @DisplayName("plugin re-applied on root does not double-configure or fail")
     fun testPluginIsIdempotent() {

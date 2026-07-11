@@ -1,5 +1,5 @@
 # INTERNAL — triggered on push to main, via merge-gate (workflow_call), and manually; never on pull_request directly.
-name: Gradle Compile & UT
+name: Security
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-build-and-deploy:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-build.yml@v2.3.5
+  security:
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-security-reports.yml@v2.3.5
     with:
-      flow-type: hybrid
       java-version: '25'
+    secrets: inherit

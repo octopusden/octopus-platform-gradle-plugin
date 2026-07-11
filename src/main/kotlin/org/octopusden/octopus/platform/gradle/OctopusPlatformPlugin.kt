@@ -6,13 +6,12 @@ import org.gradle.api.Project
 import org.slf4j.LoggerFactory
 
 class OctopusPlatformPlugin : Plugin<Project> {
-
     override fun apply(project: Project) {
         if (project != project.rootProject) {
             throw GradleException(
                 "octopus-platform-gradle-plugin must be applied on the root project, " +
                     "but was applied on subproject '${project.path}'. " +
-                    "Move `id(\"org.octopusden.octopus-platform\")` into the root build.gradle(.kts)."
+                    "Move `id(\"org.octopusden.octopus-platform\")` into the root build.gradle(.kts).",
             )
         }
 
@@ -37,11 +36,17 @@ class OctopusPlatformPlugin : Plugin<Project> {
 
         LOGGER.info(
             "octopus-platform applied: build-integration={}, publishing={}, license-management={}, sonar={}",
-            buildIntegrationEnabled, publishingEnabled, licenseManagementEnabled, sonarEnabled,
+            buildIntegrationEnabled,
+            publishingEnabled,
+            licenseManagementEnabled,
+            sonarEnabled,
         )
     }
 
-    private fun isConstituentEnabled(project: Project, key: String): Boolean {
+    private fun isConstituentEnabled(
+        project: Project,
+        key: String,
+    ): Boolean {
         val propName = "octopus-platform.$key.enabled"
         val raw = project.findProperty(propName)?.toString() ?: return true
         return when (raw.trim().lowercase()) {
@@ -51,7 +56,8 @@ class OctopusPlatformPlugin : Plugin<Project> {
                 LOGGER.warn(
                     "Unrecognised value '{}' for property '{}' — expected 'true' or 'false'. " +
                         "Falling back to default (enabled).",
-                    raw, propName,
+                    raw,
+                    propName,
                 )
                 true
             }
