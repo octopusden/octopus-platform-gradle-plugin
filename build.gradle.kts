@@ -9,7 +9,7 @@ plugins {
     signing
     id("io.github.gradle-nexus.publish-plugin")
     id("com.jfrog.artifactory")
-    id("io.gitlab.arturbosch.detekt")
+    id("dev.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.octopusden.octopus-quality")
 }
@@ -31,19 +31,20 @@ octopusQuality {
 // when subprojects exist, the root project is treated as a pure aggregator). This repo, however,
 // carries the plugin implementation source in the root module, so detekt & ktlint are applied and
 // configured here directly and folded into the aggregate `qualityStatic` task.
+// detekt 2.x splits its baselines per source set (detekt-baseline-main.xml / -test.xml) for the
+// type-resolution-enabled detektMain/detektTest tasks; the umbrella `detekt` task uses the shared
+// file named here. Same shape as the portal, which migrated first.
+//
+// None of those files exist, deliberately: this repository has zero detekt findings, so there is
+// nothing to suppress. The path is declared so that adding a baseline later needs no config change
+// — a missing baseline file is treated as empty.
+//
+// The jvm-target pin that used to live here is gone with detekt 1.23.x: it never addressed the real
+// problem. 1.23.x embeds an older Kotlin compiler whose `isAtLeastJava9` cannot parse a runtime
+// version string like "25.0.1", so `:detekt` threw IllegalArgumentException on any JDK 24+ agent
+// regardless of which bytecode target it was told to emit.
 detekt {
-    buildUponDefaultConfig = true
     baseline = file("detekt-baseline.xml")
-    ignoreFailures = false
-}
-
-// detekt 1.23.x validates --jvm-target against a max of 22; bytecode target is 17 anyway,
-// so pin detekt's jvm-target to 17.
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    jvmTarget = "17"
-}
-tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
-    jvmTarget = "17"
 }
 
 ktlint {
@@ -88,10 +89,13 @@ dependencies {
 }
 
 // The build/quality toolchain follows the JVM the workflow provisions (the Gradle daemon JVM),
-// overridable via -Poctopus.build.jdk. detekt 1.23.x bundles Kotlin 2.0.21, whose embedded compiler
-// cannot run on JDK 24+ (fails parsing the runtime version string), so the quality gate provisions
-// JDK 21; release/security keep running on their own JDK. Tracking the running JVM here means
-// compilation never needs a second, un-provisioned JDK. Bytecode is pinned to 17 regardless (below).
+// overridable via -Poctopus.build.jdk. Tracking the running JVM means compilation never needs a
+// second, un-provisioned JDK. Bytecode is pinned to 17 regardless (below).
+//
+// This used to require the quality gate to provision JDK 21 specifically, because detekt 1.23.x
+// could not run on JDK 24+. That is what made the two CI systems disagree: the GitHub quality
+// workflow provisioned 21 and passed, while the TeamCity build ran on a JDK 25 agent and failed in
+// `:detekt`. detekt 2.x carries a current Kotlin compiler and has no such ceiling.
 val octopusBuildJdk =
     (findProperty("octopus.build.jdk") as String?)?.trim()?.takeIf { it.isNotEmpty() }
         ?: JavaVersion.current().majorVersion
