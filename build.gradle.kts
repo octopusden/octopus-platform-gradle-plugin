@@ -276,6 +276,16 @@ val verifyCentralPublicationPolicy =
 // Hook the task TYPE, so a concrete publish task cannot bypass the guard; the aggregates are
 // matched by name as well because `publish` is per-project and `publishToSonatype` only exists
 // with -Pnexus, so neither can be forced into existence.
+// `check` — so the ordinary PR gate covers this explicitly.
+//
+// In this repository `check` already reached the guard by accident: octopus-quality's
+// `validatePublications` depends on `publishToMavenLocal` to materialise the artifacts, and that
+// carries the AbstractPublishToMaven hook below. That is incidental wiring in someone else's
+// plugin, and it does not hold everywhere — sibling repositories with the same guard schedule it
+// 0 times from `check`. Declaring the dependency here makes the gate a property of this build
+// rather than of another plugin's implementation detail.
+tasks.named("check") { dependsOn(verifyCentralPublicationPolicy) }
+
 gradle.projectsEvaluated {
     allprojects {
         tasks.withType(AbstractPublishToMaven::class.java).configureEach {
