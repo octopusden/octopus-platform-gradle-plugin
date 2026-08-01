@@ -17,6 +17,35 @@ plugins {
 description = "Octopus platform Gradle plugin (aggregator)"
 
 octopusQuality {
+    // Regression guard on what this repository publishes to Maven Central, provided by the shared
+    // policy in octopus-base v2.7.0. This branch previously hand-rolled a task of exactly that
+    // name; the plugin registers the same name, so the deletion and the version bump land in one
+    // commit — keeping both fails configuration.
+    //
+    // Nothing here is oversized and nothing is dropped: the plugin and its marker are exactly what
+    // Central is for. The guard exists so that stays a decision rather than a default —
+    // `java-gradle-plugin` creates publications on its own, and a second plugin id declared in
+    // `gradlePlugin {}` would silently add another marker coordinate, ~10 more files per release
+    // against an organisation-wide limit the organisation currently exceeds.
+    //
+    // The marker's groupId is NOT derivable from the repository name: across this organisation the
+    // pattern is sometimes `octopus-<name>` and sometimes `octopus.<name>`. It is read from this
+    // repository's own plugin id. Its artifact list is empty — the marker is a bare POM.
+    publication {
+        enforceCentralPublications.set(true)
+        centralPublications.set(
+            setOf(
+                // The plugin itself.
+                ":|pluginMaven|org.octopusden.octopus.platform:octopus-platform-gradle-plugin|" +
+                    "[jar, jar:javadoc, jar:sources]",
+                // The plugin-id marker `java-gradle-plugin` publishes under its OWN groupId —
+                // note `octopus-platform`, not `octopus.platform` as the coordinate above uses.
+                // It is a bare POM, hence the empty artifact list.
+                ":|OctopusPlatformPluginPluginMarkerMaven|" +
+                    "org.octopusden.octopus-platform:org.octopusden.octopus-platform.gradle.plugin|[]",
+            ),
+        )
+    }
     // No jacoco/kover in this repo — keep coverage verification off.
     coverage {
         enabled.set(false)
@@ -202,97 +231,4 @@ signing {
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
-}
-
-// Regression guard on what this repository publishes to Maven Central. Nothing here is oversized
-// and nothing is being dropped — the plugin and its marker are exactly what Central is for. The
-// guard exists so that becomes a decision rather than a default: `java-gradle-plugin` creates
-// publications on its own, and a second plugin id declared in `gradlePlugin {}` would silently add
-// another marker coordinate — ~10 more files per release against an organisation-wide limit the
-// organisation currently exceeds.
-//
-// The identity is a COMPOSITE key — project path, publication name, coordinate, and the sorted
-// artifact signatures (extension and classifier). Path alone is too weak: both publications live
-// in the same project, so a path-based set could not tell them apart, and it would not notice a
-// classifier being added to either.
-//
-// allprojects, not subprojects: the root is a publishable project like any other.
-val centralPublishedPublications = setOf(
-    // The plugin itself. Its artifact list has no `module` entry because Gradle module metadata is
-    // generated at publish time rather than being an attached artifact — the published coordinate
-    // does carry a .module file.
-    ":|pluginMaven|org.octopusden.octopus.platform:octopus-platform-gradle-plugin|" +
-        "[jar, jar:javadoc, jar:sources]",
-    // The plugin-id marker that `java-gradle-plugin` publishes under its OWN groupId (note the
-    // dash, unlike the dotted group above). It carries no artifacts of its own — only a pom and
-    // module — which is why the signature list is empty. Declaring a second plugin id in
-    // `gradlePlugin {}` would add another marker here and fail this check.
-    ":|OctopusPlatformPluginPluginMarkerMaven|" +
-        "org.octopusden.octopus-platform:org.octopusden.octopus-platform.gradle.plugin|[]",
-)
-
-fun centralPublicationPolicyProblems(): List<String> {
-    // Reading `publishing` throws on a project without maven-publish, so check the plugin first.
-    val actual = allprojects
-        .filter { it.plugins.hasPlugin("maven-publish") }
-        .flatMap { proj ->
-            proj.extensions
-                .getByType(PublishingExtension::class.java)
-                .publications
-                .withType(MavenPublication::class.java)
-                .map { pub ->
-                    val signatures = pub.artifacts
-                        .map { a -> listOfNotNull(a.extension, a.classifier).joinToString(":") }
-                        .sorted()
-                    "${proj.path}|${pub.name}|${pub.groupId}:${pub.artifactId}|$signatures"
-                }
-        }.toSet()
-    return if (actual != centralPublishedPublications) {
-        listOf(
-            "Maven Central publication set drifted.\n" +
-                "  allowlisted: ${centralPublishedPublications.sorted()}\n" +
-                "  publishing:  ${actual.sorted()}\n" +
-                "Update centralPublishedPublications only if the change is intentional.",
-        )
-    } else {
-        emptyList()
-    }
-}
-
-// A policy violation must fail its own gate, not every Gradle invocation: throwing at
-// configuration time would break build, test, dependencies and IDE sync as well.
-val verifyCentralPublicationPolicy =
-    tasks.register("verifyCentralPublicationPolicy") {
-        group = "verification"
-        description = "Fails if the set of publications reaching Maven Central drifts from the allowlist."
-        doLast {
-            val problems = centralPublicationPolicyProblems()
-            if (problems.isNotEmpty()) {
-                throw GradleException(problems.joinToString("\n\n"))
-            }
-        }
-    }
-
-// Hook the task TYPE, so a concrete publish task cannot bypass the guard; the aggregates are
-// matched by name as well because `publish` is per-project and `publishToSonatype` only exists
-// with -Pnexus, so neither can be forced into existence.
-// `check` — so the ordinary PR gate covers this explicitly.
-//
-// In this repository `check` already reached the guard by accident: octopus-quality's
-// `validatePublications` depends on `publishToMavenLocal` to materialise the artifacts, and that
-// carries the AbstractPublishToMaven hook below. That is incidental wiring in someone else's
-// plugin, and it does not hold everywhere — sibling repositories with the same guard schedule it
-// 0 times from `check`. Declaring the dependency here makes the gate a property of this build
-// rather than of another plugin's implementation detail.
-tasks.named("check") { dependsOn(verifyCentralPublicationPolicy) }
-
-gradle.projectsEvaluated {
-    allprojects {
-        tasks.withType(AbstractPublishToMaven::class.java).configureEach {
-            dependsOn(verifyCentralPublicationPolicy)
-        }
-        tasks
-            .matching { it.name in setOf("publishToSonatype", "publish", "publishToMavenLocal") }
-            .configureEach { dependsOn(verifyCentralPublicationPolicy) }
-    }
 }
