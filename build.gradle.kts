@@ -23,10 +23,10 @@ octopusQuality {
     // commit — keeping both fails configuration.
     //
     // Nothing here is oversized and nothing is dropped: the plugin and its marker are exactly what
-    // Central is for. The guard exists so that stays a decision rather than a default —
-    // `java-gradle-plugin` creates publications on its own, and a second plugin id declared in
-    // `gradlePlugin {}` would silently add another marker coordinate, ~10 more files per release
-    // against an organisation-wide limit the organisation currently exceeds.
+    // Central is for. The guard exists so that publishing more stays a decision rather than a
+    // default — `java-gradle-plugin` creates publications on its own, and a second plugin id
+    // declared in `gradlePlugin {}` would silently add another marker coordinate — ~10 more files
+    // per release, against an organisation-wide limit the organisation currently exceeds.
     //
     // The marker's groupId is NOT derivable from the repository name: across this organisation the
     // pattern is sometimes `octopus-<name>` and sometimes `octopus.<name>`. It is read from this
