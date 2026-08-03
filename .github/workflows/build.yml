@@ -9,7 +9,7 @@ on:
 
 jobs:
   run-build-and-deploy:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-build.yml@v2.7.0
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-build.yml@v2.7.1
     with:
       flow-type: hybrid
       # detekt 1.23.x (Kotlin 2.0.21) cannot run on JDK 24+, and `./gradlew build` runs detekt,
