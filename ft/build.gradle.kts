@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm")
+    id("dev.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 version = "1.0-SNAPSHOT"
@@ -31,7 +33,8 @@ kotlin {
 tasks.test {
     dependsOn(rootProject.tasks.named("publishToMavenLocal"))
     useJUnitPlatform()
-    val pluginVersion = providers.gradleProperty("octopus-platform.version")
+    val pluginVersion = providers
+        .gradleProperty("octopus-platform.version")
         .orElse(providers.environmentVariable("OCTOPUS_PLATFORM_VERSION"))
         .getOrElse(rootProject.version.toString())
     environment("OCTOPUS_PLATFORM_VERSION", pluginVersion)
@@ -39,7 +42,7 @@ tasks.test {
     testLogging.showStandardStreams = true
     providers.gradleProperty("ft.test.jdk").orNull?.toInt()?.let { jdk ->
         javaLauncher.set(
-            javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(jdk)) }
+            javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(jdk)) },
         )
     }
 }

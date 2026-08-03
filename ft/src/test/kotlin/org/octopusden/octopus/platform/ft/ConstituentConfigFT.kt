@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
  * configurable by consumers after the platform plugin is applied.
  */
 class ConstituentConfigFT {
-
     @Test
     @DisplayName("sonar extension remains configurable post-apply")
     fun testSonarExtensionOverrideStillWorks() {

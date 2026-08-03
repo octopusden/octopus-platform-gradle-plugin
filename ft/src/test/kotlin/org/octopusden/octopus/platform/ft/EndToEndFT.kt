@@ -18,7 +18,6 @@ import java.nio.file.Files
  *  - `sonar` task graph resolves successfully under `--dry-run` (no Sonar server hit)
  */
 class EndToEndFT {
-
     @Test
     @DisplayName("e2e: exportDependencies + publishToMavenLocal run successfully")
     fun testExportAndPublishLocal() {

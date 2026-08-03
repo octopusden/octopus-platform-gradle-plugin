@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
  * `publish` lifecycle correctly wired and its POM generated.
  */
 class MultiModuleFT {
-
     @Test
     @DisplayName("multi-module: poms generated in every subproject")
     fun testPomsGeneratedInEverySubproject() {

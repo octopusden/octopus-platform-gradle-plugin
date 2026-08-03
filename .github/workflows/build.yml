@@ -1,10 +1,17 @@
+# INTERNAL — triggered on push to main, via merge-gate (workflow_call), and manually; never on pull_request directly.
 name: Gradle Compile & UT
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [ main ]
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   run-build-and-deploy:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-build.yml@v2.3.4
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-build.yml@v2.7.0
     with:
-      flow-type: public
-      java-version: '25'
+      flow-type: hybrid
+      # detekt 1.23.x (Kotlin 2.0.21) cannot run on JDK 24+, and `./gradlew build` runs detekt,
+      # so compile+UT run on JDK 21 (LTS). Bytecode target stays 17 (see build.gradle.kts).
+      java-version: '21'

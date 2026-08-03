@@ -1,0 +1,15 @@
+# INTERNAL — triggered on push to main, via merge-gate (workflow_call), and manually; never on pull_request directly.
+name: Security
+
+on:
+  push:
+    branches: [ main ]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  security:
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-security-reports.yml@v2.7.0
+    with:
+      java-version: '25'
+    secrets: inherit

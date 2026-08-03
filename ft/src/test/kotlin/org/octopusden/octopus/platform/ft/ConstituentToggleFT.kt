@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
  * in place. Default behavior (all four enabled) is covered by [SmokeFT].
  */
 class ConstituentToggleFT {
-
     @Test
     @DisplayName("disabling build-integration removes exportDependencies task only")
     fun testBuildIntegrationDisabled() {

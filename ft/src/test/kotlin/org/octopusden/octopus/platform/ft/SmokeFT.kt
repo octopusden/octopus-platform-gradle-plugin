@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Test
  * the four constituent plugins' main tasks on the root project.
  */
 class SmokeFT {
-
     @Test
-    @DisplayName("applying platform plugin registers exportDependencies, artifactoryPublish, processLicensedDependencies, and sonar tasks")
+    @DisplayName(
+        "applying platform plugin registers exportDependencies, artifactoryPublish, " +
+            "processLicensedDependencies, and sonar tasks",
+    )
     fun testTasksRegistered() {
         val result = runGradle {
             testProjectName = "smoke"

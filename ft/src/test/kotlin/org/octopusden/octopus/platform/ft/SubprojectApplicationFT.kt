@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
  * must fail fast with a clear, actionable error message.
  */
 class SubprojectApplicationFT {
-
     @Test
     @DisplayName("apply on subproject fails with a clear error message (plugins { id(...) } form)")
     fun testApplicationOnSubprojectFailsFast() {
