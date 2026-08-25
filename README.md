@@ -41,7 +41,7 @@ The plugin **must be applied on the root project**. Applying it on a subproject 
 - `octopus-publishing` plugin uses `afterEvaluate` during its own apply, which cannot run on an already-evaluated root project.
 - `sonar` plugin applies to the whole build and is not designed to be applied on subprojects.
 
-### `build.gradle.kts` (root project)
+### `build.gradle.kts` (Kotlin DSL, root project)
 
 ```kotlin
 plugins {
@@ -49,12 +49,30 @@ plugins {
 }
 ```
 
-### `settings.gradle.kts` 
+### `build.gradle` (Groovy DSL, root project)
+
+```groovy
+plugins {
+    id 'org.octopusden.octopus-platform'
+}
+```
+
+### `settings.gradle.kts` (Kotlin DSL)
 
 ```kotlin
 pluginManagement {
     plugins {
         id("org.octopusden.octopus-platform") version settings.extra["octopus-platform.version"] as String
+    }
+}
+```
+
+### `settings.gradle` (Groovy DSL)
+
+```groovy
+pluginManagement {
+    plugins {
+        id 'org.octopusden.octopus-platform' version settings['octopus-platform.version']
     }
 }
 ```
@@ -71,7 +89,9 @@ octopus-platform = "<version>"
 octopus-platform = { id = "org.octopusden.octopus-platform", version.ref = "octopus-platform" }
 ```
 
-Then apply it from the root `build.gradle.kts`:
+Then apply it from the root build script:
+
+**`build.gradle.kts` (Kotlin DSL)**
 
 ```kotlin
 plugins {
@@ -79,9 +99,19 @@ plugins {
 }
 ```
 
+**`build.gradle` (Groovy DSL)**
+
+```groovy
+plugins {
+    alias(libs.plugins.octopus.platform)
+}
+```
+
 #### Overriding the version at build time
 
-For monorepo / CI scenarios where the plugin version is built in the same pipeline, override the catalog entry from `settings.gradle.kts`:
+For monorepo / CI scenarios where the plugin version is built in the same pipeline, override the catalog entry from the settings file:
+
+**`settings.gradle.kts` (Kotlin DSL)**
 
 ```kotlin
 dependencyResolutionManagement {
@@ -90,6 +120,21 @@ dependencyResolutionManagement {
             from(files("libs.versions.toml"))
             providers.gradleProperty("octopus-platform.version").orNull?.let { v ->
                 version("octopus-platform", v)
+            }
+        }
+    }
+}
+```
+
+**`settings.gradle` (Groovy DSL)**
+
+```groovy
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            def octopusPlatformVersion = providers.gradleProperty("octopus-platform.version").orNull
+            if (octopusPlatformVersion != null) {
+                version("octopus-platform", octopusPlatformVersion)
             }
         }
     }
