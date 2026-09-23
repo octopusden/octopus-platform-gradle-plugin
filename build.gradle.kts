@@ -12,6 +12,7 @@ plugins {
     id("dev.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.octopusden.octopus-quality")
+    id("org.sonarqube")
 }
 
 description = "Octopus platform Gradle plugin (aggregator)"

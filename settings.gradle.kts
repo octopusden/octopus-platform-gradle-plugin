@@ -10,6 +10,7 @@ pluginManagement {
         id("dev.detekt") version settings.providers.gradleProperty("detekt.version")
         id("org.jlleitschuh.gradle.ktlint") version settings.providers.gradleProperty("ktlint-gradle.version")
         id("org.octopusden.octopus-quality") version settings.providers.gradleProperty("octopus-quality.version")
+        id("org.sonarqube") version settings.providers.gradleProperty("sonarqube.version")
     }
 }
 
