@@ -79,7 +79,7 @@ pluginManagement {
 
 ### Using Version Catalogs (optional)
 
-If your build already uses a [version catalog](https://docs.gradle.org/current/userguide/version_catalogs.html), declare the plugin in `libs.versions.toml`:
+If your build already uses a [version catalog](https://docs.gradle.org/current/userguide/version_catalogs.html), declare the plugin in `gradle/libs.versions.toml` (Gradle imports this file automatically as `libs`):
 
 ```toml
 [versions]
@@ -117,7 +117,6 @@ For monorepo / CI scenarios where the plugin version is built in the same pipeli
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            from(files("libs.versions.toml"))
             providers.gradleProperty("octopus-platform.version").orNull?.let { v ->
                 version("octopus-platform", v)
             }
